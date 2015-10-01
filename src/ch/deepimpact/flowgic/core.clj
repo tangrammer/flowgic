@@ -2,12 +2,37 @@
   (:refer-clojure :exclude [merge])
   )
 
+(defprotocol Evaluation
+  (evaluate [_  context])
+  (relations [_ result b n]))
+
+
+(defprotocol Meta
+  (meta-name [_])
+  )
+
+
 (defn add* [c k v]
     (if-let [e (get c k)]
-      (assoc c k (conj e v))
-      (assoc c k #{v})
+      (if-let [v* (get e v)]
+        (do
+;;          (println "exccc* " (meta-name k) (meta-name v))
+;;          (println "meta* " (meta k) (meta v))
+          (let [e (disj e v)]
+            (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v))))))
+        (do
+;;          (println "second* " (meta-name k) (meta-name v))
+ ;;         (println "meta* " (meta k) (meta v))
+
+          (assoc c k (conj e v))))
+      (do
+   ;;     (println "first* " (meta-name k) (meta-name v))
+     ;;             (println "meta* " (meta k) (meta v))
+
+        (assoc c k #{v}))
       )
     )
+
 
 (defn *mname [x]
   (if (keyword? x)
@@ -19,14 +44,6 @@
       ;(-> (read-string  (pr-str x)) :name  )
       "nil"))))
 
-(defprotocol Evaluation
-  (evaluate [_  context])
-  (relations [_ result b n]))
-
-
-(defprotocol Meta
-  (meta-name [_])
-  )
 
 (extend-protocol Meta
   clojure.lang.Fn
@@ -63,8 +80,10 @@
               [kcontinue res])))))
   (relations [rules result b n]
     (reduce (fn [c [v b1 n1]]
-
-              (relations v c  (or b1 b)  (or n1 n))
+              (if b1
+                (relations v c  (or b1 b)  (or n1 n))
+                (relations (with-meta  v (meta rules)) c  (or b1 b)  (or n1 n))
+                )
 )
             (add* result b (first rules)) (map #(vector % %2 %3 )
                         rules
@@ -81,8 +100,6 @@
 
 (defn api [api-key steps flow-context-fn]
   (APIFn. steps flow-context-fn api-key))
-
-
 
 ;; if you need to use an existent logic steps ....
 ;; given a sequence of steps, replace :just for :continue

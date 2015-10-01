@@ -2,6 +2,17 @@
   (:require [ch.deepimpact.flowgic.core :as logic])
   (:refer-clojure :exclude [update true? empty?]))
 
+(defn full-boolean-mapping? [this poss]
+  (= (apply hash-set (keys poss)) #{true false}))
+
+
+(defn else-option [poss]
+  (if (=  1(count poss)  )
+    (let [f (first (first poss))]
+      (if (= Boolean (type f))
+        (if f "false" "true")
+        "else"))))
+
 (defrecord Rule [type location-value-fn evaluation-fn possibilities]
   logic/Evaluation
   (logic/evaluate [this context]
@@ -15,8 +26,10 @@
         [:continue context])))
   (logic/relations [this result b n]
     (reduce (fn [c [k v]]
-              (logic/relations v c this (with-meta  n {:rule-val k})))
-            (->  (logic/add* result this n)
+              (logic/relations v c this n))
+            (->  (if (full-boolean-mapping? this possibilities)
+                   result ;; maybe you have to add the rule with a set empty
+                   (logic/add* result this (with-meta n {:rule-val (else-option possibilities)})))
                  (logic/add* b this)
                  )
             possibilities))
@@ -28,27 +41,27 @@
 
 (defn true?
   ([location-value-fn  true-fn false-fn]
-   (Rule. :true? location-value-fn identity {true true-fn false false-fn})))
+   (Rule. :true? location-value-fn identity {true (with-meta true-fn {:rule-val true}) false (with-meta false-fn {:rule-val false})})))
 
 (defn >true?
   [location-value-fn true-fn]
-  (Rule. :>true? location-value-fn identity {true true-fn}))
+  (Rule. :>true? location-value-fn identity {true (with-meta true-fn {:rule-val true})}))
 
 (defn >false?
   [location-value-fn false-fn]
-  (Rule. :>false? location-value-fn identity {false false-fn}))
+  (Rule. :>false? location-value-fn identity {false (with-meta false-fn {:rule-val false})}))
 
 (defn empty?
   ([location-value-fn  true-fn false-fn]
-   (Rule. :empty? location-value-fn nil? {true true-fn false false-fn})))
+   (Rule. :empty? location-value-fn nil? {true (with-meta true-fn {:rule-val true}) false (with-meta false-fn {:rule-val false})})))
 
 (defn >empty?
-  [location-value-fn  a]
-  (Rule. :>empty? location-value-fn nil? {true a}))
+  [location-value-fn  true-fn]
+  (Rule. :>empty? location-value-fn nil? {true (with-meta true-fn {:rule-val true})}))
 
 (defn >not-empty?
-  [ location-value-fn  a]
-  (Rule. :>not-empty? location-value-fn nil? {false a}))
+  [ location-value-fn  false-fn]
+  (Rule. :>not-empty? location-value-fn nil? {false (with-meta false-fn {:rule-val false})}))
 
 ;; utils for drawing/introspecting rules
 (defn- get-opts [this]

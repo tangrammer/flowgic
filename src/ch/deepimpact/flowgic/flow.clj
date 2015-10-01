@@ -1,6 +1,9 @@
 (ns ch.deepimpact.flowgic.flow
   (:require [ch.deepimpact.flowgic.core :as logic]
-            [plumbing.core :refer (?>)]))
+            [ch.deepimpact.flowgic.rules :as rul]
+            [plumbing.core :refer (?>)])
+  (:import [ch.deepimpact.flowgic.rules Rule])
+  )
 
 (defrecord Continuation [add-context? action-fn result-keys flags]
   logic/Evaluation
@@ -13,14 +16,8 @@
   (logic/relations [this result b n]
     (->
      (logic/add* result this  n)
-
-
-     (?> (do
-;           (println "??? " (not= :empty? (:type b)) "--"(:type b) "--" (:location-value-fn b) (when (nil? (:type b)) [(logic/meta-name b)  (logic/meta-name this) (logic/meta-name n)] ))
-           (not= :empty? (:type b))
-           true
-           )
-         (logic/add*   b  this))
+     (?> (complement (rul/full-boolean-mapping? nil (:possibilities b)))
+         (logic/add* b this))
 
 
 
