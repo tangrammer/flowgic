@@ -1,4 +1,6 @@
-(ns ch.deepimpact.flowgic.core)
+(ns ch.deepimpact.flowgic.core
+  (:refer-clojure :exclude [merge])
+  )
 
 (defn add* [c k v]
     (if-let [e (get c k)]
@@ -15,17 +17,11 @@
       (-> x  :name )
       (-> x  meta :name )
       ;(-> (read-string  (pr-str x)) :name  )
-
       "nil"))))
-
 
 (defprotocol Evaluation
   (evaluate [_  context])
-  (relations [_ result b n])
-
-  )
-
-
+  (relations [_ result b n]))
 
 
 (defprotocol Meta
@@ -67,16 +63,51 @@
               [kcontinue res])))))
   (relations [rules result b n]
     (reduce (fn [c [v b1 n1]]
-              (relations v c  (or b1 b)  (or n1 n)))
+
+              (relations v c  (or b1 b)  (or n1 n))
+)
             (add* result b (first rules)) (map #(vector % %2 %3 )
                         rules
                         (butlast (conj (seq rules) nil))
                         (next (conj  rules nil)))))
   )
 
+(defrecord APIFn [steps flow-context-fn api-key]
+  Evaluation
+  (evaluate [this initial-data]
+    (let [initial-data (clojure.core/merge initial-data {:error-key api-key})
+          context (clojure.core/merge (flow-context-fn initial-data) initial-data)]
+      (last (evaluate steps context)))))
 
-(meta-name :+)
-(comment "you can remove whenever you need"
-  (butlast (conj (seq  [:a :b]) nil))
-          (next (conj  [:a :b] nil))
-          (or nil true))
+(defn api [api-key steps flow-context-fn]
+  (APIFn. steps flow-context-fn api-key))
+
+
+
+;; if you need to use an existent logic steps ....
+;; given a sequence of steps, replace :just for :continue
+(defrecord Merge [steps result-keys flags]
+
+  Evaluation
+  (evaluate [this context]
+    (let [[k res] (evaluate steps context)]
+      [k (clojure.core/merge context (select-keys res result-keys) flags)]))
+  (relations [this result b n]
+    (relations steps result b n))
+
+  Meta
+  (meta-name [this]
+    (meta-name steps)))
+
+;; maybe should it be renamed to `reuse` ?
+(defn merge
+  ([steps]
+   (merge steps [] {}))
+  ([steps result-keys]
+   (merge steps result-keys {}))
+  ([steps result-keys flags]
+   (let [last-step (peek steps)
+         r-k (into (:result-keys last-step) result-keys)
+         r-f  (clojure.core/merge (:flags last-step) flags)
+         last-step-mod (assoc last-step :result-keys r-k :flags r-f)]
+     (Merge. (-> steps pop (conj last-step-mod)) r-k r-f))))

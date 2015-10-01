@@ -70,40 +70,15 @@
   [action-fn]
   (Return. action-fn))
 
-;; if you need to use an existent logic steps ....
-;; given a sequence of steps, replace :just for :continue
-(defrecord Branch [steps result-keys flags]
-  logic/Evaluation
-  (logic/evaluate [this context]
-    (let [[k res] (logic/evaluate steps context)]
-      [k (merge context (select-keys res result-keys) flags)]))
-  (logic/relations [this result b n]
-    (logic/relations steps result b n))
-  logic/Meta
-  (logic/meta-name [this]
-    (logic/meta-name steps)))
-
-;; maybe should it be renamed to `reuse` ?
-(defn branch
-  ([steps]
-   (branch steps [] {}))
-  ([steps result-keys]
-   (branch steps result-keys {}))
-  ([steps result-keys flags]
-   (let [last-step (peek steps)
-         r-k (into (:result-keys last-step) result-keys)
-         r-f  (merge (:flags last-step) flags)
-         last-step-mod (assoc last-step :result-keys r-k :flags r-f)]
-     (Branch. (-> steps pop (conj last-step-mod)) r-k r-f))))
 
 
-#_(defmethod clojure.core/print-method Continuation
+
+
+(defmethod clojure.core/print-method Continuation
   [this ^java.io.Writer writer]
   (.write writer (str  (logic/meta-name this))))
 
-#_(defmethod clojure.core/print-method Return
+(defmethod clojure.core/print-method Return
   [this ^java.io.Writer writer]
-  (println (:action-fn this))
-  (println (meta (:action-fn this)))
   (.write writer (str  (logic/meta-name this)))
 )

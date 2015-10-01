@@ -14,22 +14,16 @@
             [:continue context]))
         [:continue context])))
   (logic/relations [this result b n]
-   (reduce (fn [c [k v]]
-                 (logic/relations v c this n))
-           (do
-             (println ">> type " (= type :empty?) "**" type "**" )
-             (println [(logic/meta-name b) "*******"(logic/meta-name this) "*******"(logic/meta-name n)])
-             #_(if (= type :empty?)
-               result
-               (logic/add* result this n))
-             (logic/add* result this n)
-             )
-               possibilities)
+    (reduce (fn [c [k v]]
+              (logic/relations v c this (with-meta  n {:rule-val k})))
+            (->  (logic/add* result this n)
+                 (logic/add* b this)
+                 )
+            possibilities))
 
-    )
   logic/Meta
   (logic/meta-name [this]
-     (str  (name type) "\n" (logic/meta-name location-value-fn)) )
+     (str (name type) "\n" (logic/meta-name location-value-fn)) )
   )
 
 (defn true?
@@ -60,7 +54,7 @@
 (defn- get-opts [this]
   (reduce (fn [c [_ v]] (str c (.getSimpleName (type v)))) "" (:possibilities this)) )
 
-#_(defmethod clojure.core/print-method Rule
+(defmethod clojure.core/print-method Rule
   [this ^java.io.Writer writer]
   (.write writer (str  (logic/meta-name this)))
 )
