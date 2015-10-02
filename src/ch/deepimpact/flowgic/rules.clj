@@ -2,7 +2,8 @@
   (:require [ch.deepimpact.flowgic.core :as logic])
   (:refer-clojure :exclude [update true? empty?]))
 
-(defn full-boolean-mapping? [this poss]
+
+(defn full-boolean-mapping? [poss]
   (= (apply hash-set (keys poss)) #{true false}))
 
 
@@ -27,8 +28,10 @@
   (logic/relations [this result b n]
     (reduce (fn [c [k v]]
               (logic/relations v c this n))
-            (->  (if (full-boolean-mapping? this possibilities)
-                   result ;; maybe you have to add the rule with a set empty
+            (->  (if (full-boolean-mapping?  possibilities)
+                   (reduce (fn [c [_ v] ]
+                             (logic/add* c this v)
+                             ) result possibilities)
                    (logic/add* result this (with-meta n {:rule-val (else-option possibilities)})))
                  (logic/add* b this)
                  )
@@ -36,7 +39,7 @@
 
   logic/Meta
   (logic/meta-name [this]
-     (str (name type) "\n" (logic/meta-name location-value-fn)) )
+    (str (name type) "\n" (logic/meta-name location-value-fn)) )
   )
 
 (defn true?
@@ -63,11 +66,8 @@
   [ location-value-fn  false-fn]
   (Rule. :>not-empty? location-value-fn nil? {false (with-meta false-fn {:rule-val false})}))
 
-;; utils for drawing/introspecting rules
-(defn- get-opts [this]
-  (reduce (fn [c [_ v]] (str c (.getSimpleName (type v)))) "" (:possibilities this)) )
 
 (defmethod clojure.core/print-method Rule
   [this ^java.io.Writer writer]
   (.write writer (str  (logic/meta-name this)))
-)
+  )

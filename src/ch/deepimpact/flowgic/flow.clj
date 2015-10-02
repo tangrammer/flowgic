@@ -1,9 +1,7 @@
 (ns ch.deepimpact.flowgic.flow
   (:require [ch.deepimpact.flowgic.core :as logic]
             [ch.deepimpact.flowgic.rules :as rul]
-            [plumbing.core :refer (?>)])
-  (:import [ch.deepimpact.flowgic.rules Rule])
-  )
+            [plumbing.core :refer (?>)]))
 
 (defrecord Continuation [add-context? action-fn result-keys flags]
   logic/Evaluation
@@ -16,13 +14,9 @@
   (logic/relations [this result b n]
     (->
      (logic/add* result this  n)
-     (?> (complement (rul/full-boolean-mapping? nil (:possibilities b)))
-         (logic/add* b this))
+     (?> (not (rul/full-boolean-mapping? (:possibilities b)))
+         (logic/add* b this))))
 
-
-
-
-     ))
   logic/Meta
   (logic/meta-name [this]
     (let [m (meta  action-fn)]
@@ -37,12 +31,12 @@
   (logic/relations [this result b n]
     (-> (logic/add* result b this)
         (logic/add* this :+)))
-    logic/Meta
+  logic/Meta
   (logic/meta-name [this]
-     (let [m (meta  action-fn)]
-       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-             "\n"
-             (:name m))))
+    (let [m (meta  action-fn)]
+      (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
+            "\n"
+            (:name m))))
   )
 
 (defn continue
@@ -52,7 +46,7 @@
    (continue action-fn result-keys {}))
   ([action-fn result-keys flags]
    (Continuation. true action-fn result-keys flags)))
-(= (type (continue identity)) Continuation)
+
 ;; doesn't merge with initial data the result
 (defn just
   ([action-fn]
@@ -78,4 +72,4 @@
 (defmethod clojure.core/print-method Return
   [this ^java.io.Writer writer]
   (.write writer (str  (logic/meta-name this)))
-)
+  )

@@ -15,23 +15,10 @@
 (defn add* [c k v]
     (if-let [e (get c k)]
       (if-let [v* (get e v)]
-        (do
-;;          (println "exccc* " (meta-name k) (meta-name v))
-;;          (println "meta* " (meta k) (meta v))
-          (let [e (disj e v)]
-            (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v))))))
-        (do
-;;          (println "second* " (meta-name k) (meta-name v))
- ;;         (println "meta* " (meta k) (meta v))
-
-          (assoc c k (conj e v))))
-      (do
-   ;;     (println "first* " (meta-name k) (meta-name v))
-     ;;             (println "meta* " (meta k) (meta v))
-
-        (assoc c k #{v}))
-      )
-    )
+        (let [e (disj e v)]
+          (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v)))))
+        (assoc c k (conj e v)))
+      (assoc c k #{v})))
 
 
 (defn *mname [x]
@@ -83,9 +70,9 @@
               (if b1
                 (relations v c  (or b1 b)  (or n1 n))
                 (relations (with-meta  v (meta rules)) c  (or b1 b)  (or n1 n))
-                )
-)
-            (add* result b (first rules)) (map #(vector % %2 %3 )
+                ))
+            (add* result b (first rules))
+            (map #(vector % %2 %3 )
                         rules
                         (butlast (conj (seq rules) nil))
                         (next (conj  rules nil)))))

@@ -88,10 +88,10 @@
                                        (flow/continue (with-meta identity {:name "B"}))
                                        (flow/exit (with-meta identity {:name "C"}))]
                                       [(flow/continue (with-meta identity {:name "Y"}))
-                                       (flow/exit (with-meta identity {:name "X"}))])
+                                       (flow/continue (with-meta identity {:name "X"}))])
 
                          )
-           (flow/exit (with-meta identity {:name "AL"}))]
+           (flow/continue (with-meta identity {:name "AL"}))]
           {:+ #{} :* #{}} :* :+)]
                                         ;  (pprint g)
    (view-graph (keys g) g
