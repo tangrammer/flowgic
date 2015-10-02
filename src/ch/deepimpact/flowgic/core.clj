@@ -16,7 +16,9 @@
     (if-let [e (get c k)]
       (if-let [v* (get e v)]
         (let [e (disj e v)]
-          (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v)))))
+          (if (= v :+) ;; end step cant' contain metadata :+ . this should be improved
+            (assoc c k (conj e v))
+            (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v))))))
         (assoc c k (conj e v)))
       (assoc c k #{v})))
 
