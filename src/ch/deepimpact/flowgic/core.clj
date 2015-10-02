@@ -93,17 +93,18 @@
 ;; if you need to use an existent logic steps ....
 ;; given a sequence of steps, replace :just for :continue
 (defrecord Merge [steps result-keys flags]
-
   Evaluation
   (evaluate [this context]
     (let [[k res] (evaluate steps context)]
-      [k (clojure.core/merge context (select-keys res result-keys) flags)]))
+      (if (= k :exit)
+        [k res]
+        [k (clojure.core/merge context (select-keys res result-keys) flags)])))
   (relations [this result b n]
     (relations steps result b n))
 
   Meta
   (meta-name [this]
-    (meta-name steps)))
+       "p-merge"))
 
 ;; maybe should it be renamed to `reuse` ?
 (defn merge
