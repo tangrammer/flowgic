@@ -13,6 +13,7 @@
 
 
 (defn add* [c k v]
+  (if (and (not= clojure.lang.PersistentVector (type  k)) (not= clojure.lang.PersistentVector (type  v)))
     (if-let [e (get c k)]
       (if-let [v* (get e v)]
         (let [e (disj e v)]
@@ -20,7 +21,8 @@
             (assoc c k (conj e v))
             (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v))))))
         (assoc c k (conj e v)))
-      (assoc c k #{v})))
+      (assoc c k #{v}))
+    c))
 
 
 (defn *mname [x]
@@ -52,7 +54,7 @@
     (str  this))
   clojure.lang.PersistentVector
   (meta-name [this ]
-    "p-vector")
+    nil)
   String
   (meta-name [this]
     (str  this))
@@ -73,6 +75,9 @@
                 (relations v c  (or b1 b)  (or n1 n))
                 (relations (with-meta  v (meta rules)) c  (or b1 b)  (or n1 n))
                 ))
+            #_(if  (= clojure.lang.PersistentVector (type b))
+              result
+            (add* result b (first rules))  )
             (add* result b (first rules))
             (map #(vector % %2 %3 )
                         rules
@@ -104,7 +109,7 @@
 
   Meta
   (meta-name [this]
-       "p-merge"))
+       (meta-name (first this))))
 
 ;; maybe should it be renamed to `reuse` ?
 (defn merge
