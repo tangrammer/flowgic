@@ -1,8 +1,9 @@
 (ns ch.deepimpact.flowgic.graph
   (:require [plumbing.core :refer (?>)])
-  (:import [ch.deepimpact.flowgic.rules Rule]
-           [ch.deepimpact.flowgic.flow Continuation Return])
-  )
+  (:import
+           [ch.deepimpact.flowgic.flow Continuation Return]
+           [ch.deepimpact.flowgic.core Merge]
+           [ch.deepimpact.flowgic.rules Rule]))
 
 ;; this ns should live in another lib
 
@@ -72,5 +73,8 @@
   (relations [this result b n]
     (-> (add* result b this)
         (add* this :+)))
+  Merge
+  (relations [this result b n]
+    (relations (:steps this) result b n))
 
   )

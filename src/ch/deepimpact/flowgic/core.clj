@@ -1,6 +1,5 @@
 (ns ch.deepimpact.flowgic.core
-  (:require [ch.deepimpact.flowgic.graph :as graph])
-  (:refer-clojure :exclude [merge]))
+ (:refer-clojure :exclude [merge]))
 
 (defprotocol Evaluation
   (evaluate [_  context]))
@@ -63,10 +62,6 @@
       (if (= k :exit)
         [k res]
         [k (clojure.core/merge context (select-keys res result-keys) flags)])))
-  graph/Graph
-  (graph/relations [this result b n]
-    (graph/relations steps result b n))
-
   Meta
   (meta-name [this]
        (meta-name (first this))))

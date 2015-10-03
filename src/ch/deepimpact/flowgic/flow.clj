@@ -1,8 +1,5 @@
 (ns ch.deepimpact.flowgic.flow
-  (:require [ch.deepimpact.flowgic.core :as logic]
-            [ch.deepimpact.flowgic.rules :as rul]
-
-            [plumbing.core :refer (?>)]))
+  (:require [ch.deepimpact.flowgic.core :as logic]))
 
 (defrecord Continuation [add-context? action-fn result-keys flags]
   logic/Evaluation
