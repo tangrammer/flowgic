@@ -1,6 +1,7 @@
 (ns ch.deepimpact.flowgic.flow
   (:require [ch.deepimpact.flowgic.core :as logic]
             [ch.deepimpact.flowgic.rules :as rul]
+
             [plumbing.core :refer (?>)]))
 
 (defrecord Continuation [add-context? action-fn result-keys flags]
@@ -11,11 +12,6 @@
               (merge context (select-keys res result-keys) flags)
               (merge res flags))]
       [:continue e]))
-  (logic/relations [this result b n]
-    (->
-     (logic/add* result this  n)
-     (?> (not (rul/full-boolean-mapping? (:possibilities b)))
-         (logic/add* b this))))
 
   logic/Meta
   (logic/meta-name [this]
@@ -28,9 +24,6 @@
   logic/Evaluation
   (logic/evaluate [this context]
     [:exit (action-fn context)])
-  (logic/relations [this result b n]
-    (-> (logic/add* result b this)
-        (logic/add* this :+)))
   logic/Meta
   (logic/meta-name [this]
     (let [m (meta  action-fn)]
@@ -60,10 +53,6 @@
 (defn exit
   [action-fn]
   (Return. action-fn))
-
-
-
-
 
 (defmethod clojure.core/print-method Continuation
   [this ^java.io.Writer writer]

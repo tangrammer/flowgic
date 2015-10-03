@@ -2,6 +2,7 @@
   (:require
    [rhizome.viz :refer :all]
    [ch.deepimpact.flowgic.core :as logic]
+   [ch.deepimpact.flowgic.graph :as graph]
    [plumbing.core :refer (fnk sum ?> ?>> defnk)]
    [ch.deepimpact.flowgic.rules :as rules]
    [clojure.pprint :refer (pprint)]
@@ -81,7 +82,7 @@
   )
 
 
-(def g (let [g (logic/relations
+(def g (let [g (graph/relations
           [(rules/>true? :user
                          (rules/true? :x
                                       [(flow/continue (with-meta identity {:name "A"}))

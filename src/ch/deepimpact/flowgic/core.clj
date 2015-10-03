@@ -1,64 +1,35 @@
 (ns ch.deepimpact.flowgic.core
-  (:refer-clojure :exclude [merge])
-  )
+  (:require [ch.deepimpact.flowgic.graph :as graph])
+  (:refer-clojure :exclude [merge]))
 
 (defprotocol Evaluation
-  (evaluate [_  context])
-  (relations [_ result b n]))
-
+  (evaluate [_  context]))
 
 (defprotocol Meta
-  (meta-name [_])
-  )
-
-
-(defn add* [c k v]
-  (if (and (not= clojure.lang.PersistentVector (type  k)) (not= clojure.lang.PersistentVector (type  v)))
-    (if-let [e (get c k)]
-      (if-let [v* (get e v)]
-        (let [e (disj e v)]
-          (if (= v :+) ;; end step cant' contain metadata :+ . this should be improved
-            (assoc c k (conj e v))
-            (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v))))))
-        (assoc c k (conj e v)))
-      (assoc c k #{v}))
-    c))
-
-
-(defn *mname [x]
-  (if (keyword? x)
-    x
-    (keyword
-     (or
-      (-> x  :name )
-      (-> x  meta :name )
-      ;(-> (read-string  (pr-str x)) :name  )
-      "nil"))))
-
+  (meta-name [_]))
 
 (extend-protocol Meta
   clojure.lang.Fn
-  (meta-name [this ]
+  (meta-name [this]
      (let [m (meta  this)]
                   (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
                         "\n"
                         (:name m))))
   clojure.lang.Var
-  (meta-name [this ]
+  (meta-name [this]
     (let [m (meta  this)]
          (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
                "\n"
                (:name m))))
   clojure.lang.Keyword
-  (meta-name [this ]
+  (meta-name [this]
     (str  this))
   clojure.lang.PersistentVector
-  (meta-name [this ]
+  (meta-name [this]
     nil)
   String
   (meta-name [this]
-    (str  this))
-  )
+    (str  this)))
 
 (extend-protocol Evaluation
   clojure.lang.PersistentVector
@@ -68,23 +39,10 @@
           (let [[kcontinue res] (evaluate a c)]
             (if (and n* (= :continue kcontinue))
               (recur (first n*) (next n*) res)
-              [kcontinue res])))))
-  (relations [rules result b n]
-    (reduce (fn [c [v b1 n1]]
-              (if b1
-                (relations v c  (or b1 b)  (or n1 n))
-                (relations (with-meta  v (meta rules)) c  (or b1 b)  (or n1 n))
-                ))
-            #_(if  (= clojure.lang.PersistentVector (type b))
-              result
-            (add* result b (first rules))  )
-            (add* result b (first rules))
-            (map #(vector % %2 %3 )
-                        rules
-                        (butlast (conj (seq rules) nil))
-                        (next (conj  rules nil)))))
-  )
+              [kcontinue res]))))))
 
+
+;; this is an API logic, it helps on api fn definition
 (defrecord APIFn [steps flow-context-fn api-key]
   Evaluation
   (evaluate [this initial-data]
@@ -97,6 +55,7 @@
 
 ;; if you need to use an existent logic steps ....
 ;; given a sequence of steps, replace :just for :continue
+;; and merge context in the result
 (defrecord Merge [steps result-keys flags]
   Evaluation
   (evaluate [this context]
@@ -104,14 +63,14 @@
       (if (= k :exit)
         [k res]
         [k (clojure.core/merge context (select-keys res result-keys) flags)])))
-  (relations [this result b n]
-    (relations steps result b n))
+  graph/Graph
+  (graph/relations [this result b n]
+    (graph/relations steps result b n))
 
   Meta
   (meta-name [this]
        (meta-name (first this))))
 
-;; maybe should it be renamed to `reuse` ?
 (defn merge
   ([steps]
    (merge steps [] {}))
