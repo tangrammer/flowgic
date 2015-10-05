@@ -1,12 +1,15 @@
 (ns ch.deep-impact.flowgic.core-test
   (:require
    [ch.deepimpact.flowgic.graph :as graph]
-   [rhizome.viz :refer :all]
+   [ch.deepimpact.flowgic.meta :as met]
    [ch.deepimpact.flowgic.core :as logic]
-   [plumbing.core :refer (fnk sum ?> ?>> defnk)]
-   [ch.deepimpact.flowgic.rules :as rules]
-   [clojure.pprint :refer (pprint)]
    [ch.deepimpact.flowgic.flow :as flow]
+   [ch.deepimpact.flowgic.rules :as rules]
+
+   [plumbing.core :refer (fnk sum ?> ?>> defnk)]
+
+   [clojure.pprint :refer (pprint)]
+
    [clojure.test :refer (deftest use-fixtures is)]
 )
 
@@ -80,55 +83,3 @@
           (logic/evaluate [(flow/continue res-a [:res] {:x true})]
                           {:a "a" :b "b"})))
    ))
-
-
-(def g (let [g (graph/relations
-                [(rules/>true? :user
-                               (rules/true? :x
-                                            [(flow/continue (with-meta identity {:name "A"}))
-                                             (flow/continue (with-meta identity {:name "B"}))
-                                             (flow/exit (with-meta identity {:name "C"}))]
-                                            [(flow/continue (with-meta identity {:name "Y"}))
-                                             (flow/continue (with-meta identity {:name "X"}))])
-
-                               )
-                 (flow/continue (with-meta identity {:name "AL"}))]
-                {:+ #{} :* #{}} :* :+)]
-                                        ;  (pprint g)
-         (view-graph (keys g) g
-                     :vertical? true
-                     :options { :resolution 72 :bgcolor "#C6CFD532"}
-                     :node->descriptor (fn [n*] (let [n (logic/meta-name n*)]
-                                                 {:label n
-                                                  :color (if (= "Return" (.getSimpleName (type n* )))
-                                                           "red"
-                                                           "black"
-                                                           )
-                                                  :style :filled
-                                                  :bgcolor (if (= "Return" (.getSimpleName (type n* )))
-                                                             "red"
-                                                             "black"
-                                                             )
-                                                  :fillcolor (condp = (.getSimpleName(type n*))
-                                                               "Return" "red"
-                                                               "Rule" "#81F7F3"
-                                                               "Continuation" "#F8ECE0"
-                                                               "none"
-                                                               )
-                                                  :shape (if (or (= n ":+") (= n ":*")) "circle"
-                                                             (if (= "Rule" (.getSimpleName(type n*)))
-                                                               "diamond"
-                                                               (if (= "Return" (.getSimpleName(type n* )))
-                                                                 "invhouse"
-                                                                 "box"
-                                                                 )))}))
-                     :edge->descriptor (fn [e1 e2 ] (let [e*   (when (= "Rule" (.getSimpleName (type e1)))
-                                                                (str (-> e2 meta :rule-val)))]
-                                                     {:label  e*}))
-
-
-                     )
-
-         g
-
-         ))

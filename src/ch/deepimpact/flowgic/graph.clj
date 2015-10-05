@@ -1,5 +1,9 @@
 (ns ch.deepimpact.flowgic.graph
-  (:require [plumbing.core :refer (?>)])
+  (:require [plumbing.core :refer (?>)]
+            [ch.deepimpact.flowgic.core :as c]
+            [ch.deepimpact.flowgic.flow :as f]
+            [ch.deepimpact.flowgic.rules :as ru])
+
   (:import
            [ch.deepimpact.flowgic.flow Continuation Return]
            [ch.deepimpact.flowgic.core Merge]
@@ -75,6 +79,4 @@
         (add* this :+)))
   Merge
   (relations [this result b n]
-    (relations (:steps this) result b n))
-
-  )
+    (relations (:steps this) result b n)))

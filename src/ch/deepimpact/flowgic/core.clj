@@ -4,32 +4,6 @@
 (defprotocol Evaluation
   (evaluate [_  context]))
 
-(defprotocol Meta
-  (meta-name [_]))
-
-(extend-protocol Meta
-  clojure.lang.Fn
-  (meta-name [this]
-     (let [m (meta  this)]
-                  (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-                        "\n"
-                        (:name m))))
-  clojure.lang.Var
-  (meta-name [this]
-    (let [m (meta  this)]
-         (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-               "\n"
-               (:name m))))
-  clojure.lang.Keyword
-  (meta-name [this]
-    (str  this))
-  clojure.lang.PersistentVector
-  (meta-name [this]
-    nil)
-  String
-  (meta-name [this]
-    (str  this)))
-
 (extend-protocol Evaluation
   clojure.lang.PersistentVector
   (evaluate [rules flow-context]
@@ -39,6 +13,7 @@
             (if (and n* (= :continue kcontinue))
               (recur (first n*) (next n*) res)
               [kcontinue res]))))))
+
 
 
 ;; this is an API logic, it helps on api fn definition
@@ -61,10 +36,7 @@
     (let [[k res] (evaluate steps context)]
       (if (= k :exit)
         [k res]
-        [k (clojure.core/merge context (select-keys res result-keys) flags)])))
-  Meta
-  (meta-name [this]
-       (meta-name (first this))))
+        [k (clojure.core/merge context (select-keys res result-keys) flags)]))))
 
 (defn merge
   ([steps]

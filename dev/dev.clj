@@ -11,7 +11,17 @@
    [clojure.string :as str]
    [clojure.test :as test]
    [clojure.tools.namespace.repl :refer [refresh refresh-all]]
-   [ch.deepimpact.flowgic.core]))
+   [ch.deepimpact.flowgic.core]
+
+   [ch.deepimpact.flowgic.graph :as gr]
+   [ch.deepimpact.flowgic.meta :as met]
+   [ch.deepimpact.flowgic.core :as logic]
+   [ch.deepimpact.flowgic.flow :as flow]
+   [ch.deepimpact.flowgic.rules :as rules]
+
+   [plumbing.core :refer (fnk sum ?> ?>> defnk)]
+
+   [rhizome.viz :refer :all]))
 
 (def system
   "A Var containing an object representing the application under
@@ -50,3 +60,54 @@
   []
   (stop)
   (refresh :after `go))
+
+(def g (let [g (gr/relations
+                [(rules/>true? :user
+                               (rules/true? :x
+                                            [(flow/continue (with-meta identity {:name "A"}))
+                                             (flow/continue (with-meta identity {:name "B"}))
+                                             (flow/exit (with-meta identity {:name "C"}))]
+                                            [(flow/continue (with-meta identity {:name "Y"}))
+                                             (flow/continue (with-meta identity {:name "X"}))])
+
+                               )
+                 (flow/continue (with-meta identity {:name "AL"}))]
+                {:+ #{} :* #{}} :* :+)]
+                                        ;  (pprint g)
+         (view-graph (keys g) g
+                     :vertical? true
+                     :options { :resolution 72 :bgcolor "#C6CFD532"}
+                     :node->descriptor (fn [n*] (let [n (met/meta-name n*)]
+                                                 {:label n
+                                                  :color (if (= "Return" (.getSimpleName (type n* )))
+                                                           "red"
+                                                           "black"
+                                                           )
+                                                  :style :filled
+                                                  :bgcolor (if (= "Return" (.getSimpleName (type n* )))
+                                                             "red"
+                                                             "black"
+                                                             )
+                                                  :fillcolor (condp = (.getSimpleName(type n*))
+                                                               "Return" "red"
+                                                               "Rule" "#81F7F3"
+                                                               "Continuation" "#F8ECE0"
+                                                               "none"
+                                                               )
+                                                  :shape (if (or (= n ":+") (= n ":*")) "circle"
+                                                             (if (= "Rule" (.getSimpleName(type n*)))
+                                                               "diamond"
+                                                               (if (= "Return" (.getSimpleName(type n* )))
+                                                                 "invhouse"
+                                                                 "box"
+                                                                 )))}))
+                     :edge->descriptor (fn [e1 e2 ] (let [e*   (when (= "Rule" (.getSimpleName (type e1)))
+                                                                (str (-> e2 meta :rule-val)))]
+                                                     {:label  e*}))
+
+
+                     )
+
+         g
+
+         ))

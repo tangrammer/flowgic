@@ -1,6 +1,6 @@
 (ns ch.deepimpact.flowgic.rules
   (:require [ch.deepimpact.flowgic.core :as logic])
-  (:refer-clojure :exclude [update true? empty?]))
+  (:refer-clojure :exclude [ true? empty?]))
 
 (defrecord Rule [type location-value-fn evaluation-fn possibilities]
   logic/Evaluation
@@ -15,9 +15,6 @@
         [:continue context])))
 
 
-  logic/Meta
-  (logic/meta-name [this]
-    (str (name type) "\n" (logic/meta-name location-value-fn)) )
   )
 
 (defn true?
@@ -43,8 +40,3 @@
 (defn >not-empty?
   [ location-value-fn  false-fn]
   (Rule. :>not-empty? location-value-fn nil? {false (with-meta false-fn {:rule-val false})}))
-
-(defmethod clojure.core/print-method Rule
-  [this ^java.io.Writer writer]
-  (.write writer (str  (logic/meta-name this)))
-  )

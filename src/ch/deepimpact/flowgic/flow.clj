@@ -10,23 +10,12 @@
               (merge res flags))]
       [:continue e]))
 
-  logic/Meta
-  (logic/meta-name [this]
-    (let [m (meta  action-fn)]
-      (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-            "\n"
-            (:name m)))))
+  )
 
 (defrecord Return [action-fn]
   logic/Evaluation
   (logic/evaluate [this context]
     [:exit (action-fn context)])
-  logic/Meta
-  (logic/meta-name [this]
-    (let [m (meta  action-fn)]
-      (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-            "\n"
-            (:name m))))
   )
 
 (defn continue
@@ -50,12 +39,3 @@
 (defn exit
   [action-fn]
   (Return. action-fn))
-
-(defmethod clojure.core/print-method Continuation
-  [this ^java.io.Writer writer]
-  (.write writer (str  (logic/meta-name this))))
-
-(defmethod clojure.core/print-method Return
-  [this ^java.io.Writer writer]
-  (.write writer (str  (logic/meta-name this)))
-  )
