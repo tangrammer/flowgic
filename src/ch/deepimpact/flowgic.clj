@@ -1,13 +1,12 @@
 (ns ch.deepimpact.flowgic
-  (:require [ch.deepimpact.flowgic.core :as c])
+  (:require [ch.deepimpact.flowgic.core :as core])
   (:import [ch.deepimpact.flowgic.core Continuation Return Merge APIFn Rule])
-  (:refer-clojure :exclude [ true? empty? merge])
+  (:refer-clojure :exclude [true? empty? merge]))
 
-  )
-
-
+;; main protocol fn
 (defn evaluate [this context]
-  (c/evaluate this context))
+  (core/evaluate this context))
+
 ;; this is an API logic, it helps on api fn definition
 (defn api [api-key steps flow-context-fn]
   (APIFn. steps flow-context-fn api-key))
@@ -27,6 +26,13 @@
          last-step-mod (assoc last-step :result-keys r-k :flags r-f)]
      (Merge. (-> steps pop (conj last-step-mod)) r-k r-f))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;; FLOWS ;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn continue
   ([action-fn]
    (continue action-fn [] {}))
@@ -44,13 +50,19 @@
   ([action-fn result-keys flags]
    (Continuation. false action-fn result-keys flags)))
 
-;; short-circuit, similar to exception but beahviour&data oriented
+;; circuit-breaker,
+;; similar to exception but beahviour&data oriented
 (defn exit
   [action-fn]
   (Return. action-fn))
 
 
-;;; RULES
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;; RULES ;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn true?
   ([location-value-fn  true-fn false-fn]
    (Rule. :true? location-value-fn identity {true (with-meta true-fn {:rule-val true}) false (with-meta false-fn {:rule-val false})})))
