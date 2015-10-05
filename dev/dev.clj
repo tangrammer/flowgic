@@ -17,7 +17,7 @@
    [ch.deepimpact.flowgic.meta :as flowgic.meta]
    [ch.deepimpact.flowgic :as flowgic]
    [ch.deepimpact.flowgic.graph :as flowgic.graph]
-   [plumbing.core :refer (fnk sum ?> ?>> defnk)]
+   [plumbing.core :refer (fnk)]
 
    [rhizome.viz :refer :all]))
 
@@ -108,18 +108,24 @@
          g
 
          ))
-(comment README
+(comment
+  README
 
-         (require '[ch.deepimpact.flowgic :as flowgic])
+  (require '[ch.deepimpact.flowgic :as flowgic])
+  (require '[plumbing.core :refer (fnk)])
 
-         [(flowgic/continue (fn [a] {}))
-          (flowgic/continue (fn [b] {}))
-          (flowgic/just (fn [qc] {}))])
+  (def steps [(flowgic/continue (fn [{:keys [input]}] {:res1 (inc input)}) )
+              (flowgic/continue (fn [{:keys [input]}] {:res2 (+ input (inc res1))}))
+              (flowgic/continue (fn [{:keys [input]}] {:res3 3}))])
+  (= {:res 3} (flowgic/evaluate steps {:input 0}))
 
-(let [g(flowgic.graph/relations
+  )
+
+#_(let [g(flowgic.graph/relations
         [(flowgic/continue (with-meta (fnk []) {:name "A"}) )
          (flowgic/continue (with-meta (fnk []) {:name "B"}))
-         (flowgic/just (with-meta (fnk []) {:name "C"}))]
+;         (flowgic/just (with-meta (fnk []) {:name "C"}))
+         ]
         {:+ #{} :* #{}} :* :+)]
            (view-graph (keys g) g
                      :vertical? true
@@ -154,3 +160,20 @@
 
                      )
            g)
+(def step (flowgic/continue (fn [map] {:res "0"})))
+
+(def step1 (flowgic/continue (fn [map] {:res1 "1"}) [:res1]))
+
+(def step2 (flowgic/continue (fn [map] {:res2 "2"}) [:res2] {:step2 true}))
+(= [:continue {}] (flowgic/evaluate step {}))
+(= [:continue {:res1 "1"}] (flowgic/evaluate step1 {}))
+(= [:continue {:res2 "2" :step2 true}] (flowgic/evaluate step2 {}))
+
+(def step-exit (flowgic/exit (fn [map] {:res "EXIT"})))
+(= [:exit {:res "EXIT"}] (flowgic/evaluate step-exit {}))
+
+(def steps [step1 step2])
+
+
+(= [:continue {:initial-data "hello", :res1 "1", :res2 "2", :step2 true}]
+   (flowgic/evaluate steps {:initial-data "hello"}))
