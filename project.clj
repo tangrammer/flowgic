@@ -1,4 +1,4 @@
-(defproject ch.deepimpact/flowgic "0.1.0"
+(defproject ch.deepimpact/flowgic "0.1.1-SNAPSHOT"
   :description "Flow logic goes declarative"
   :url "https://github.com/DEEP-IMPACT-AG/flowgic"
   :license {:name "The MIT License"

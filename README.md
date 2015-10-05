@@ -14,14 +14,14 @@ TODO: Brief description
 
 [Leiningen] dependency information:
 
-    [ch.deepimpact/flowgic "0.1.0-SNAPSHOT"]
+    [ch.deepimpact/flowgic "0.1.0"]
 
 [Maven] dependency information:
 
     <dependency>
       <groupId>ch.deepimpact</groupId>
       <artifactId>flowgic</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>0.1.0</version>
     </dependency>
 
 [Leiningen]: http://leiningen.org/
