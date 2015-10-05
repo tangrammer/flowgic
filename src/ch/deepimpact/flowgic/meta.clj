@@ -1,10 +1,6 @@
 (ns ch.deepimpact.flowgic.meta
-  (:require [ch.deepimpact.flowgic.core :as core]
-            [ch.deepimpact.flowgic.flow :as flow]
-            [ch.deepimpact.flowgic.rules :as ru])
-  (:import [ch.deepimpact.flowgic.core Merge]
-           [ch.deepimpact.flowgic.flow Continuation Return]
-           [ch.deepimpact.flowgic.rules Rule])
+  (:require [ch.deepimpact.flowgic.core :as core])
+  (:import [ch.deepimpact.flowgic.core Continuation Return Merge Rule])
   (:refer-clojure :exclude [meta]))
 
 (defprotocol Meta
@@ -34,13 +30,13 @@
   (meta-name [this]
     (let [m (clojure.core/meta  (:action-fn this))]
       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-            "\n"
+            (when (:ns m) "\n")
             (:name m))))
   Return
   (meta-name [this]
     (let [m (clojure.core/meta  (:action-fn this))]
       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-            "\n"
+            (when (:ns m) "\n")
             (:name m))))
 
   Rule
@@ -52,7 +48,7 @@
   (meta-name [this]
     (let [m (clojure.core/meta  this)]
       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
-            "\n"
+            (when (:ns m) "\n")
             (:name m))))
   clojure.lang.Var
   (meta-name [this]

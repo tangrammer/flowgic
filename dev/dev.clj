@@ -13,12 +13,10 @@
    [clojure.tools.namespace.repl :refer [refresh refresh-all]]
    [ch.deepimpact.flowgic.core]
 
-   [ch.deepimpact.flowgic.graph :as gr]
-   [ch.deepimpact.flowgic.meta :as met]
-   [ch.deepimpact.flowgic.core :as logic]
-   [ch.deepimpact.flowgic.flow :as flow]
-   [ch.deepimpact.flowgic.rules :as rules]
 
+   [ch.deepimpact.flowgic.meta :as flowgic.meta]
+   [ch.deepimpact.flowgic :as flowgic]
+   [ch.deepimpact.flowgic.graph :as flowgic.graph]
    [plumbing.core :refer (fnk sum ?> ?>> defnk)]
 
    [rhizome.viz :refer :all]))
@@ -61,7 +59,7 @@
   (stop)
   (refresh :after `go))
 
-(def g (let [g (gr/relations
+#_(def g (let [g (gr/relations
                 [(rules/>true? :user
                                (rules/true? :x
                                             [(flow/continue (with-meta identity {:name "A"}))
@@ -86,8 +84,7 @@
                                                   :style :filled
                                                   :bgcolor (if (= "Return" (.getSimpleName (type n* )))
                                                              "red"
-                                                             "black"
-                                                             )
+                                                             "black")
                                                   :fillcolor (condp = (.getSimpleName(type n*))
                                                                "Return" "red"
                                                                "Rule" "#81F7F3"
@@ -111,3 +108,49 @@
          g
 
          ))
+(comment README
+
+         (require '[ch.deepimpact.flowgic :as flowgic])
+
+         [(flowgic/continue (fn [a] {}))
+          (flowgic/continue (fn [b] {}))
+          (flowgic/just (fn [qc] {}))])
+
+(let [g(flowgic.graph/relations
+        [(flowgic/continue (with-meta (fnk []) {:name "A"}) )
+         (flowgic/continue (with-meta (fnk []) {:name "B"}))
+         (flowgic/just (with-meta (fnk []) {:name "C"}))]
+        {:+ #{} :* #{}} :* :+)]
+           (view-graph (keys g) g
+                     :vertical? true
+                     :options { :resolution 72 :bgcolor "#C6CFD532"}
+                     :node->descriptor (fn [n*] (let [n (flowgic.meta/meta-name n*)]
+                                                 {:label n
+                                                  :color (if (= "Return" (.getSimpleName (type n* )))
+                                                           "red"
+                                                           "black"
+                                                           )
+                                                  :style :filled
+                                                  :bgcolor (if (= "Return" (.getSimpleName (type n* )))
+                                                             "red"
+                                                             "black")
+                                                  :fillcolor (condp = (.getSimpleName(type n*))
+                                                               "Return" "red"
+                                                               "Rule" "#81F7F3"
+                                                               "Continuation" "#F8ECE0"
+                                                               "none"
+                                                               )
+                                                  :shape (if (or (= n ":+") (= n ":*")) "circle"
+                                                             (if (= "Rule" (.getSimpleName(type n*)))
+                                                               "diamond"
+                                                               (if (= "Return" (.getSimpleName(type n* )))
+                                                                 "invhouse"
+                                                                 "box"
+                                                                 )))}))
+                     :edge->descriptor (fn [e1 e2 ] (let [e*   (when (= "Rule" (.getSimpleName (type e1)))
+                                                                (str (-> e2 meta :rule-val)))]
+                                                     {:label  e*}))
+
+
+                     )
+           g)

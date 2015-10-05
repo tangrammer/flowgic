@@ -14,9 +14,6 @@
               (recur (first n*) (next n*) res)
               [kcontinue res]))))))
 
-
-
-;; this is an API logic, it helps on api fn definition
 (defrecord APIFn [steps flow-context-fn api-key]
   Evaluation
   (evaluate [this initial-data]
@@ -24,12 +21,6 @@
           context (clojure.core/merge (flow-context-fn initial-data) initial-data)]
       (last (evaluate steps context)))))
 
-(defn api [api-key steps flow-context-fn]
-  (APIFn. steps flow-context-fn api-key))
-
-;; if you need to use an existent logic steps ....
-;; given a sequence of steps, replace :just for :continue
-;; and merge context in the result
 (defrecord Merge [steps result-keys flags]
   Evaluation
   (evaluate [this context]
@@ -38,14 +29,32 @@
         [k res]
         [k (clojure.core/merge context (select-keys res result-keys) flags)]))))
 
-(defn merge
-  ([steps]
-   (merge steps [] {}))
-  ([steps result-keys]
-   (merge steps result-keys {}))
-  ([steps result-keys flags]
-   (let [last-step (peek steps)
-         r-k (into (:result-keys last-step) result-keys)
-         r-f  (clojure.core/merge (:flags last-step) flags)
-         last-step-mod (assoc last-step :result-keys r-k :flags r-f)]
-     (Merge. (-> steps pop (conj last-step-mod)) r-k r-f))))
+(defrecord Continuation [add-context? action-fn result-keys flags]
+  Evaluation
+  (evaluate [this context]
+    (let [res (action-fn context)
+          e (if add-context?
+              (clojure.core/merge context (select-keys res result-keys) flags)
+              (clojure.core/merge res flags))]
+      [:continue e])))
+
+(defrecord Return [action-fn]
+  Evaluation
+  (evaluate [this context]
+    [:exit (action-fn context)]))
+
+
+(defrecord Rule [type location-value-fn evaluation-fn possibilities]
+  Evaluation
+  (evaluate [this context]
+    (let [value (location-value-fn context)
+          evaluation (evaluation-fn value)]
+      (if ((complement nil?) evaluation)
+        (let [action-fn  (get possibilities evaluation)]
+          (if ((complement nil?) action-fn)
+            (evaluate action-fn context)
+            [:continue context]))
+        [:continue context])))
+
+
+  )

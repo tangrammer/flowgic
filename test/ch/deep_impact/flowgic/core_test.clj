@@ -2,9 +2,9 @@
   (:require
    [ch.deepimpact.flowgic.graph :as graph]
    [ch.deepimpact.flowgic.meta :as met]
-   [ch.deepimpact.flowgic.core :as logic]
-   [ch.deepimpact.flowgic.flow :as flow]
-   [ch.deepimpact.flowgic.rules :as rules]
+   [ch.deepimpact.flowgic :as flowgic]
+   [ch.deepimpact.flowgic.core :as core]
+
 
    [plumbing.core :refer (fnk sum ?> ?>> defnk)]
 

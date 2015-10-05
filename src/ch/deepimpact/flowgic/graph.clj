@@ -1,13 +1,8 @@
 (ns ch.deepimpact.flowgic.graph
   (:require [plumbing.core :refer (?>)]
-            [ch.deepimpact.flowgic.core :as c]
-            [ch.deepimpact.flowgic.flow :as f]
-            [ch.deepimpact.flowgic.rules :as ru])
+            [ch.deepimpact.flowgic.core :as c*])
 
-  (:import
-           [ch.deepimpact.flowgic.flow Continuation Return]
-           [ch.deepimpact.flowgic.core Merge]
-           [ch.deepimpact.flowgic.rules Rule]))
+  (:import [ch.deepimpact.flowgic.core Merge Continuation Return Rule]))
 
 ;; this ns should live in another lib
 
