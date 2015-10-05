@@ -92,24 +92,28 @@ Chaining Continuations is the same as putting theme in a vector. Of course, you 
 ```
 As you can see we always get the initial-context merged with all actions selections. And the evaluation is ordered based in vector position 
 
+TODO: hightlight that the context is merged/updated in each Continuation
+
 
 ##TODO
 explain following types (flowgit/Evaluation impls)
 
 * core/Rule
-* core/Merge
-* core/APIFn
+ * flowgic/true?
+ * flowgic/>true?
+ * flowgic/>false?
+ * flowgic/emtpy?
+ * flowgic/>emtpy?
+ * flowgic/>not-emtpy?
 
-and following constructor fns
+more   
+   
+* core/Merge => flowgic/merge
+* core/APIFn => flowgic/api
+
+and more
 
 * flowgic/just
-* flowgic/merge
-* flowgic/true?
-* flowgic/>true?
-* flowgic/>false?
-* flowgic/emtpy?
-* flowgic/>emtpy?
-* flowgic/>not-emtpy?
 
 
 ##More things interesting
