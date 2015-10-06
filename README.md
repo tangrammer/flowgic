@@ -1,39 +1,48 @@
 # ch.deepimpact/flowgic
 
-###**Devs & PMs** communication
 
-`flowgic` is a coding style proposal focused in highlighting the logical structure of internals of API fns. Generally API fns play the role of Controllers that have to *manage* different services regarding inputs, outputs and rules
+`flowgic` is a coding style proposal (or DSL) focused in highlighting the logical internal flow of *API fns*. 
 
-We realise also that giving more clarity at this point we can improve task's communication between devs,  and devs & project managers.   
+###*API fns* = *controller fns*
 
-### flow diagrams!
-**[flow diagramms](https://duckduckgo.com/?q=flow+diagram&iax=1&ia=images&iai=http%3A%2F%2Fstar-w.kir.jp%2Fgrp%2F9%2Fflow-chart-diagram-software-i1.png) is the best way of devs&devs&PMs to communicate!!** (indeed it is a very good resource if you want understand/view the complex of a process flow)
+API fns usually play the role of Controllers that have to *manage* different services regarding inputs, outputs, steps, rules and decisions.
 
-Although ...  the situation doen't work normally...  the developer usually prefers to write the code directly once he/she has the use case description and, the PM usually doesn't know or remember all the differents inputs, outputs, conditions, rules ... 
 
-`flowgit` proposes a **declarative DSL** to the developer and PM to specify the logical flow of an API fn. 
-**Besides that just using this DSL the code becomes clearer**, we can also generate dynamic flow diagram based on `flowgit` defintions.
+### The existent solution doesn't *usually* work
+Although **[flow diagramms](https://duckduckgo.com/?q=flow+diagram&iax=1&ia=images&iai=http%3A%2F%2Fstar-w.kir.jp%2Fgrp%2F9%2Fflow-chart-diagram-software-i1.png)** is the common solution to express logical flows that happens inside our API fns, the situation doen't work normally...  the developer usually prefers to write the code directly once he/she has the use case description and, the PM usually doesn't know or remember all the differents inputs, outputs, conditions, rules ... 
+
+
+###our solution and goals
+`flowgit` proposes a **declarative DSL** to the developer (and PM too!) to specify the logical flow of its API fns. 
+
+* the code becomes clearer :)
+* task's communication between devs and clients or project managers is improved :)
+* `flowgic` code can be easily parsed and analysed to generate dynamic [flow diagrams](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png)
+* once that you can see what your code does you can know which parts need to be tested from the others that dont' need (you don't need to test the conditions just the actions)
+* is easy to add any middleware too :)
 
 
 ### this lib can be useful if...  
 * your logic flow is a [complex and nested one](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png)
-* your API fns are tricky to understand, even by you after a few days [example](https://gist.github.com/tangrammer/b8fc6687f051ab059ac2#file-old_api-clj)
-* your fns receive a map and return a map. Of course you can adapt your fns to this great pattern! And if you keep brave you can give a try to [Prismatic/fnk](https://github.com/Prismatic/plumbing#fnk) :)
+* your API fns are tricky to understand, even by the author after a few days [example](https://gist.github.com/tangrammer/b8fc6687f051ab059ac2#file-old_api-clj)
+* your fns receive a map and return a map. Of course you could always adapt your *APIs/controller fns* to this great pattern => [Prismatic/fnk](https://github.com/Prismatic/plumbing#fnk) 
 
-#The `flowgic` protocol
+#Let's dive into `flowgic`!
+
+## Main protocol: core/Evaluation
 
 ```clojure
 (defprotocol Evaluation
   (evaluate [this  context]))
 ```
-As you can see, any Evaluation can be evaluated with a context. And a context is a clojure map. That's all! :)
+
+As you can see, any `core/Evaluation` can be evaluated with a context. The **`context` is a clojure map.**
 
 
-#The `flowgic` entities
+##The `flowgic` impls and fns
+Flowgic comes with a bunch of Evaluation impls and fns constructors. So each one can be evaluated with a context but the result will depend of each impl
 
-`(require '[ch.deepimpact.flowgic :as flowgic])`
-
-## core/Continuation => flowgic/continue
+### core/Continuation => flowgic/continue
 The typical box that **represents an action-fn**. Always between 2 entities    
 
 <img width="150"  src="https://cloud.githubusercontent.com/assets/731829/10295406/d13a0cb6-6bc0-11e5-83eb-49eb65a4e95c.png">   
@@ -72,8 +81,7 @@ Return is the break circuit in a flow. Similar to exception but just sending dat
 
 <img width="150" src="https://cloud.githubusercontent.com/assets/731829/10295571/cc5eb56a-6bc1-11e5-97b7-1c4d1ba20e1d.png">
 
-```clojure
-  
+```clojure  
 (def step-exit (flowgic/exit (fn [map] {:res "EXIT"})))
 (= [:exit {:res "EXIT"}] (flowgic/evaluate step-exit {}))              
 ```
@@ -85,8 +93,7 @@ Return is the break circuit in a flow. Similar to exception but just sending dat
 Chaining Continuations is the same as putting theme in a vector. Of course, you can evaluate pipelines too!
 
 
-```clojure
-  
+```clojure  
 (def steps [step step1])
 
 (= [:continue {:initial-data "hello", :res1 "1", :res2 "2", :step2 true}]
@@ -122,7 +129,7 @@ and more
 
 
 ###fn & DI
-`flowgic` is really very influenced by [Prismatic/graph](link) and its Dependency Injection at the *function&args* level in the same way as stuartsierra/component does at the *system&component* level
+`flowgic` is really very influenced by [Prismatic/graph](link) and its Dependency Injection at the *function&args* level
 
 
 yep, `flowgic` remains a bit similar to [pipeline programming](https://en.wikipedia.org/wiki/Pipeline_(software)) 
