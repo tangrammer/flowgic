@@ -1,31 +1,29 @@
-# ch.deepimpact/flowgic
+# Introduction
 
 
-`flowgic` is a coding style proposal (or DSL) focused in highlighting the logical internal flow of *API fns*. 
+**`flowgic` is a tiny formal grammar to describe the internal logic flow of controller-fns.**
 
-###*API fns* = *controller fns*
+###Controller-fns
+Controller-fns are those that play a *Controller Role*, managing different services, inputs, outputs, steps, rules and decisions. In other words they have to manage a lot of knowledge thus they're really complex 
 
-API fns usually play the role of Controllers that have to *manage* different services regarding inputs, outputs, steps, rules and decisions.
+On the contrary, `flowgic` tries to bring the clarity of **[flow diagramms](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png)** to these 'controller-fns'. 
+
+Summarising, `flowgic` is a coding style proposal (like a *DSL*) to better express the logical flow of these controller-fns. 
 
 
-### The existent solution doesn't *usually* work
-Although **[flow diagramms](https://duckduckgo.com/?q=flow+diagram&iax=1&ia=images&iai=http%3A%2F%2Fstar-w.kir.jp%2Fgrp%2F9%2Fflow-chart-diagram-software-i1.png)** is the common solution to express logical flows that happens inside our API fns, the situation doen't work normally...  the developer usually prefers to write the code directly once he/she has the use case description and, the PM usually doesn't know or remember all the differents inputs, outputs, conditions, rules ... 
-
-
-###our solution and goals
-`flowgit` proposes a **declarative DSL** to the developer (and PM too!) to specify the logical flow of its API fns. 
+###Goals
 
 * the code becomes clearer :)
-* task's communication between devs and clients or project managers is improved :)
+* the code is so clear that task's communication between devs and clients or project managers is improved :)
 * `flowgic` code can be easily parsed and analysed to generate dynamic [flow diagrams](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png)
-* once that you can see what your code does you can know which parts need to be tested from the others that dont' need (you don't need to test the conditions just the actions)
-* is easy to add any middleware too :)
+* you can derive from flowgic code wich parts/fns need to be tested from the others that dont' need (usually you have to focus on actions instead of flow rules)
+* is easy to add any middleware due as you always work with fns 
 
 
 ### this lib can be useful if...  
 * your logic flow is a [complex and nested one](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png)
-* your API fns are tricky to understand, even by the author after a few days [example](https://gist.github.com/tangrammer/b8fc6687f051ab059ac2#file-old_api-clj)
-* your fns receive a map and return a map. Of course you could always adapt your *APIs/controller fns* to this great pattern => [Prismatic/fnk](https://github.com/Prismatic/plumbing#fnk) 
+* your controller-fns are tricky to understand, even by the author after a few days [example](https://gist.github.com/tangrammer/b8fc6687f051ab059ac2#file-old_api-clj)
+* your fns receive a map and return a map. Of course you could always adapt your *controller-fns* to this great pattern => [Prismatic/fnk](https://github.com/Prismatic/plumbing#fnk) 
 
 #Let's dive into `flowgic`!
 
