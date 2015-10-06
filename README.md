@@ -2,10 +2,12 @@
 
 ###**Devs & PMs** communication
 
-`flowgic` is a coding style proposal focused in improving task's communication between developers and project managers.   
+`flowgic` is a coding style proposal focused in highlighting the logical structure of internals of API fns. Generally API fns play the role of Controllers that have to *manage* different services regarding inputs, outputs and rules
+
+We realise also that giving more clarity at this point we can improve task's communication between devs,  and devs & project managers.   
 
 ### flow diagrams!
-**[flow diagramms](https://duckduckgo.com/?q=flow+diagram&iax=1&ia=images&iai=http%3A%2F%2Fstar-w.kir.jp%2Fgrp%2F9%2Fflow-chart-diagram-software-i1.png) is the best way of devs&PMs to communicate!!** (indeed it is a very good resource if you want understand/view the complex of a process flow)
+**[flow diagramms](https://duckduckgo.com/?q=flow+diagram&iax=1&ia=images&iai=http%3A%2F%2Fstar-w.kir.jp%2Fgrp%2F9%2Fflow-chart-diagram-software-i1.png) is the best way of devs&devs&PMs to communicate!!** (indeed it is a very good resource if you want understand/view the complex of a process flow)
 
 Although ...  the situation doen't work normally...  the developer usually prefers to write the code directly once he/she has the use case description and, the PM usually doesn't know or remember all the differents inputs, outputs, conditions, rules ... 
 
