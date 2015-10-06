@@ -31,13 +31,16 @@
     (let [m (clojure.core/meta  (:action-fn this))]
       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
             (when (:ns m) "\n")
-            (:name m))))
+            (:name m))
+      (:name m)
+      ))
   Return
   (meta-name [this]
     (let [m (clojure.core/meta  (:action-fn this))]
       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
             (when (:ns m) "\n")
-            (:name m))))
+            (:name m))
+      (:name m)))
 
   Rule
   (meta-name [this]
@@ -49,7 +52,9 @@
     (let [m (clojure.core/meta  this)]
       (str  (last (clojure.string/split  (str  (:ns  m)) #"\."))
             (when (:ns m) "\n")
-            (:name m))))
+            (:name m))
+      (:name m)
+      ))
   clojure.lang.Var
   (meta-name [this]
     (let [m (clojure.core/meta  this)]
@@ -58,7 +63,7 @@
             (:name m))))
   clojure.lang.Keyword
   (meta-name [this]
-    (str  this))
+    (str  (name this)))
   clojure.lang.PersistentVector
   (meta-name [this]
     nil)

@@ -1,6 +1,8 @@
 (ns ch.deepimpact.flowgic.graph
   (:require [plumbing.core :refer (?>)]
-            [ch.deepimpact.flowgic.core :as c*])
+            [ch.deepimpact.flowgic.meta :as m]
+            [ch.deepimpact.flowgic.core :as c*]
+            [rhizome.viz :as viz])
 
   (:import [ch.deepimpact.flowgic.core Merge Continuation Return Rule]))
 
@@ -32,6 +34,7 @@
 
 (defprotocol Graph
   (relations [_ result b n])
+  (color [_])
   )
 
 (extend-protocol Graph
@@ -50,6 +53,8 @@
                         rules
                         (butlast (conj (seq rules) nil))
                         (next (conj  rules nil)))))
+  (color [_]
+    "black")
   Rule
   (relations [this result b n]
     (reduce (fn [c [k v]]
@@ -62,16 +67,62 @@
                  (add* b this)
                  )
             (:possibilities this)))
+  (color [_]
+    "black")
   Continuation
   (relations [this result b n]
     (->
      (add* result this  n)
      (?> (not (full-boolean-mapping? (:possibilities b)))
          (add* b this))))
+  (color [_]
+    "black")
   Return
   (relations [this result b n]
     (-> (add* result b this)
         (add* this :+)))
+  (color [_]
+      "red")
   Merge
   (relations [this result b n]
-    (relations (:steps this) result b n)))
+    (relations (:steps this) result b n))
+  (color [_]
+    "black")
+  clojure.lang.Keyword
+  (color [_]
+    "black")
+  )
+
+
+
+(defn view [logic-container]
+  (let [g (relations logic-container {:+ #{} :* #{}} :* :+)]
+    (viz/view-graph (keys g) g
+                    :vertical? true
+                    :options { :resolution 72 :bgcolor "#C6CFD532"}
+                    :node->descriptor (fn [n*] (let [n (m/meta-name n*)]
+                                                {:label n
+                                                 :color (color n*)
+                                                 :style :filled
+                                                 :bgcolor (if (= "Return" (.getSimpleName (type n* )))
+                                                            "red"
+                                                            "black")
+                                                 :fillcolor (condp = (.getSimpleName(type n*))
+                                                              "Return" "red"
+                                                              "Rule" "#81F7F3"
+                                                              "Continuation" "#F8ECE0"
+                                                              "none"
+                                                              )
+                                                 :shape (if (or (= n ":+") (= n ":*")) "circle"
+                                                            (if (= "Rule" (.getSimpleName(type n*)))
+                                                              "diamond"
+                                                              (if (= "Return" (.getSimpleName(type n* )))
+                                                                "invhouse"
+                                                                "box"
+                                                                )))}))
+                    :edge->descriptor (fn [e1 e2 ] (let [e*   (when (= "Rule" (.getSimpleName (type e1)))
+                                                               (str (-> e2 meta :rule-val)))]
+                                                    {:label  e*}))
+
+
+                    )))

@@ -5,7 +5,8 @@
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [prismatic/schema "0.4.3"]
-                 [prismatic/plumbing "0.4.4"]]
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.11"]
-                                  [rhizome "0.2.5"]]
+                 [prismatic/plumbing "0.4.4"]
+                 [rhizome "0.2.5"]]
+
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.11"]]
                    :source-paths ["dev"]}})

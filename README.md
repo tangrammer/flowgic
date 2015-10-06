@@ -3,6 +3,8 @@
 
 **`flowgic` is a tiny formal grammar to describe the internal logic flow of controller-fns.**
 
+    [ch.deepimpact/flowgic "0.1.0"]
+
 ###Controller-fns
 Controller-fns are those that play a *Controller Role*, managing different services, inputs, outputs, steps, rules and decisions. In other words they have to manage a lot of knowledge thus they're really complex 
 
