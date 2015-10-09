@@ -1,16 +1,13 @@
-# Introduction
+# Introduction 
 
 
-**`flowgic` is a tiny formal grammar to describe the internal logic flow of controller-fns.**
+**`flowgic` is a clojure DSL to describe and [visualise](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png) the internal logic flow of controller like fns.**
 
     [ch.deepimpact/flowgic "0.1.0"]
 
 ###Controller-fns
-Controller-fns are those that play a *Controller Role*, managing different services, inputs, outputs, steps, rules and decisions. In other words they have to manage a lot of knowledge thus they're really complex 
-
-On the contrary, `flowgic` tries to bring the clarity of **[flow diagramms](https://cloud.githubusercontent.com/assets/731829/10277888/8a5bf848-6b59-11e5-96de-1b67fab4981b.png)** to these 'controller-fns'. 
-
-Summarising, `flowgic` is a coding style proposal (like a *DSL*) to better express the logical flow of these controller-fns. 
+Controller-fns are those that play a *Controller Role*, managing different services, inputs, outputs, steps, decisions and rules. 
+With so many conditions and vars our understanding of the behaviour of the fn decreases exponentially. 
 
 
 ###Goals
@@ -27,57 +24,54 @@ Summarising, `flowgic` is a coding style proposal (like a *DSL*) to better expre
 * your controller-fns are tricky to understand, even by the author after a few days [example](https://gist.github.com/tangrammer/b8fc6687f051ab059ac2#file-old_api-clj)
 * your fns receive a map and return a map. Of course you could always adapt your *controller-fns* to this great pattern => [Prismatic/fnk](https://github.com/Prismatic/plumbing#fnk) 
 
-#Let's dive into `flowgic`!
+#Let's say that ...
+A controller-fn is a **sequence of logics to be evaluated** having a context.
 
-## Main protocol: core/Evaluation
+Something like: `[logic1 logic2 logic3]`
+and logic1, logic2, and logic3 implements flowgic.core/Logic
 
 ```clojure
-(defprotocol Evaluation
-  (evaluate [this  context]))
+(defprotocol flowgic.core/Logic
+  (evaluate [this  ^clojure.lang.PersistentArrayMap context]))
 ```
 
-As you can see, any `core/Evaluation` can be evaluated with a context. The **`context` is a clojure map.**
+In other words and to clarify a bit more: **A `flowgic/Logic` needs a logical-context to be able to solve an evaluation**
 
 
-##The `flowgic` impls and fns
-Flowgic comes with a bunch of Evaluation impls and fns constructors. So each one can be evaluated with a context but the result will depend of each impl
+##flowgic.core/Logic impls
 
 ### core/Continuation => flowgic/continue
-The typical box that **represents an action-fn**. Always between 2 entities    
+A Continuation means: after a Logic/evaluation, flow must continue on next logic (except core/Return, see next impl)
+
+
+Typically, Continuation is represented as a intermediate box between 2 others (other of same or different type)
 
 <img width="150"  src="https://cloud.githubusercontent.com/assets/731829/10295406/d13a0cb6-6bc0-11e5-83eb-49eb65a4e95c.png">   
 
-3 ways to get a core/Continuation 
 
-* if you don't need to select anything of the result or add any static data to the result
- * `(flowgit/continue action-fn result-keys)`
-* if you need to select some values from the result
- * `(flowgit/continue action-fn result-keys)`
-* if you need to select some values and add some others
- * `(flowgit/continue action-fn result-keys flags)` 
-
+There are three ways to get a core/Continuation 
 
 
 ```clojure
-  (def step (flowgic/continue (fn [map] {:res "A"})))            
+;; if you don't need to select anything of the result or add any static data to the result
+  (def cont (flowgic/continue (fn [map] nil))    
+  (= [:continue {:a 1}] (flowgic/evaluate cont {:a 1}))
+          
+;;if you need to select some values from the result
+  (def cont1 (flowgic/continue (fn [map] {:cont1 "A"}) [:res1])) 
+  (= [:continue {:a 1 :cont1 "A"}] (flowgic/evaluate cont1 {:a 1}))
 
-  (def step1 (flowgic/continue (fn [map] {:res1 "B"}) [:res1])) 
-  
-  (def step2 (flowgic/continue (fn [map] {:res1 "B"}) [:res1] {:step2 true}))
-                                  
+;;if you need to select some values and add some others  
+  (def cont2 (flowgic/continue (fn [map] {:cont2 "B"}) [:cont2] {:flag2 "cont2-flag"}))
+(= [:continue {:a 1 :cont2 "B" :flag2 "cont2-flag"}] (flowgic/evaluate cont2 {:a 1}))
 ```
 
-Now let's evaluate the Continuation 
-
-```clojure
-(= [:continue {}] (flowgic/evaluate step {}))
-(= [:continue {:res1 "1"}] (flowgic/evaluate step1 {}))
-(= [:continue {:res2 "2" :step2 true}] (flowgic/evaluate step2 {}))
-
-```
 
 ##  core/Return => flowgic/exit
-Return is the break circuit in a flow. Similar to exception but just sending data to the end.
+*Return is the break circuit in a flow.*
+
+A Return means: after logic evaluation, flow must end returning the fn return value
+The behaviour is similar to exception but just sending its own result to the end.
 
 <img width="150" src="https://cloud.githubusercontent.com/assets/731829/10295571/cc5eb56a-6bc1-11e5-97b7-1c4d1ba20e1d.png">
 
@@ -86,22 +80,19 @@ Return is the break circuit in a flow. Similar to exception but just sending dat
 (= [:exit {:res "EXIT"}] (flowgic/evaluate step-exit {}))              
 ```
 
-
-### Continuation Seqs, Steps, Pipeline => [ ]
-<img width="50" alt="screen shot 2015-10-06 at 01 00 13" src="https://cloud.githubusercontent.com/assets/731829/10296077/b1a162f0-6bc5-11e5-9d33-9a8a40aaa15a.png">
-
-Chaining Continuations is the same as putting theme in a vector. Of course, you can evaluate pipelines too!
+### Logic Seqs, => [ logic1 logic2 logic3]
+A vector means: evaluate the context with the first logic, then if Continuation pass the res of first evaluation merged with the initial context to the second logic and repeat until the end (that it returns the context merged with all the continuation results).
+If instead of Continuation we get Return, then we return the result of Return.
 
 
 ```clojure  
-(def steps [step step1])
+(def logics [cont cont1 cont2])
 
-(= [:continue {:initial-data "hello", :res1 "1", :res2 "2", :step2 true}]
+(= [:continue {:initial-data "hello", :cont1 "A", :cont2 "B", :flag2 "cont2-flag"}]
    (flowgic/evaluate steps {:initial-data "hello"}))   
 ```
-As you can see we always get the initial-context merged with all actions selections. And the evaluation is ordered based in vector position 
+<img width="50" alt="screen shot 2015-10-06 at 01 00 13" src="https://cloud.githubusercontent.com/assets/731829/10296077/b1a162f0-6bc5-11e5-9d33-9a8a40aaa15a.png">
 
-TODO: hightlight that the context is merged/updated in each Continuation
 
 
 ##TODO
@@ -134,6 +125,8 @@ and more
 
 yep, `flowgic` remains a bit similar to [pipeline programming](https://en.wikipedia.org/wiki/Pipeline_(software)) 
 
+* similar to ring protocol, 
+Yes, indeed I realised that it was the same as ring handler `(handler request)` but adding more data to the handler fn, something like `(#(evaluate (FlowgicImpl. data) %) request)` 
 
 
 
