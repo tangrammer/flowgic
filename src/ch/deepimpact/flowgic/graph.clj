@@ -8,14 +8,15 @@
 
 ;; this ns should live in another lib
 
-
+(def END :END)
+(def START :START)
 ;; this fn should be moved to protocol and lets polymorphism do the rest
 (defn add* [c k v]
   (if (and (not= clojure.lang.PersistentVector (type  k)) (not= clojure.lang.PersistentVector (type  v)))
     (if-let [e (get c k)]
       (if-let [v* (get e v)]
         (let [e (disj e v)]
-          (if (= v :+) ;; end step cant' contain metadata :+ . this should be improved
+          (if (= v END) ;; end step cant' contain metadata :+ . this should be improved
             (assoc c k (conj e v))
             (assoc c k (conj e (vary-meta v* clojure.core/merge (meta v))))))
         (assoc c k (conj e v)))
@@ -80,7 +81,7 @@
   Return
   (relations [this result b n]
     (-> (add* result b this)
-        (add* this :+)))
+        (add* this END)))
   (color [_]
       "red")
   Merge
@@ -95,10 +96,10 @@
 
 
 
-(defn view [logic-container]
-  (let [g (relations logic-container {:+ #{} :* #{}} :* :+)]
+(defn view [logic-container proyection]
+  (let [g (relations logic-container {START #{} END #{}} START END)]
     (viz/view-graph (keys g) g
-                    :vertical? true
+                    :vertical? (= proyection :vertical)
                     :options { :resolution 72 :bgcolor "#C6CFD532"}
                     :node->descriptor (fn [n*] (let [n (m/meta-name n*)]
                                                 {:label n
@@ -113,11 +114,11 @@
                                                               "Continuation" "#F8ECE0"
                                                               "none"
                                                               )
-                                                 :shape (if (or (= n ":+") (= n ":*")) "circle"
+                                                 :shape (if (or (= n (name END)) (= n (name START))) "none"
                                                             (if (= "Rule" (.getSimpleName(type n*)))
                                                               "diamond"
                                                               (if (= "Return" (.getSimpleName(type n* )))
-                                                                "invhouse"
+                                                                (if (= proyection :vertical) "invhouse" "cds")
                                                                 "box"
                                                                 )))}))
                     :edge->descriptor (fn [e1 e2 ] (let [e*   (when (= "Rule" (.getSimpleName (type e1)))
