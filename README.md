@@ -145,24 +145,90 @@ If some logic is of Return type, then we return the result of Return.
 
 <img width="971" alt="screen shot 2015-10-09 at 12 09 15" src="https://cloud.githubusercontent.com/assets/731829/10391326/9647bc00-6e7e-11e5-9cd6-18120daeb6d1.png">
 
+##  core/Rule 
+**`flowgic/true?` `flowgic/>true?` `flowgic/>false?` `flowgic/emtpy?`  `flowgic/>emtpy?` `flowgic/>not-emtpy?`**
+
+A core/Rule means: continue specific Logic if matching condition on function-evaluation-with-current-context. On the contrary follows next logic.
+
+Rules are represented with diamond shape.
+
+<img width="400" alt="screen shot 2015-10-09 at 11 54 27" src="https://cloud.githubusercontent.com/assets/731829/10391039/85aef5f4-6e7c-11e5-8fac-680107702e7a.png">
+
+The `function-evaluation-with-current-context ` is the result of calling `(your-fn current-logic-context)`. For example if you have this context `{:a true :b false}` your rule can use `(f/true? fn-passing-current-context logic-on-true logic-on-false)`, then with that context the flow will continue on `logic-on-true`. I hope it will be clearer if you read below a bit more :)
+
+
+### `flowgic/true?`
+`(f/true? fn-passing-current-context logic-on-true logic-on-false)`
+
+You want to specify what has to happen on true and on false
+<img width="1041" alt="screen shot 2015-10-09 at 12 22 31" src="https://cloud.githubusercontent.com/assets/731829/10391627/73072c1a-6e80-11e5-838f-6361efba0054.png">
+
+```clojure  
+(= [:continue {:initial-data "hello", :fn-to-locate-value-in-a-context true, :condition-was true}]
+   (f/evaluate (f/true? :fn-to-locate-value-in-a-context
+                        (f/continue (defnk on-true-fn [:as map]) [] {:condition-was true})
+                        (f/continue (defnk on-false-fn [:as map]) :condition-was false )
+                        )
+               {:initial-data "hello" :fn-to-locate-value-in-a-context true}))
+
+```
+
+### `flowgic/>true?`
+`(f/>true? fn-passing-current-context logic-on-true)`
+
+The same as previous, but you always want to continue if false. 
+
+```clojure  
+(= [:continue {:initial-data "hello", :fn-to-locate-value-in-a-context true, :condition-was true}]
+   (f/evaluate (f/>true? :fn-to-locate-value-in-a-context
+                        (f/continue (defnk on-true-fn [:as map]) [] {:condition-was true}))
+               {:initial-data "hello" :fn-to-locate-value-in-a-context true}))
+```
+### `flowgic/>false?`
+`(f/>false? fn-passing-current-context logic-on-false)`
+
+The same as previous, but you always want to continue if true. 
+
+```clojure  
+(= [:continue {:initial-data "hello", :fn-to-locate-value-in-a-context false, :condition-was false}]
+   (f/evaluate (f/>false? :fn-to-locate-value-in-a-context
+                        (f/continue (defnk on-false-fn [:as map]) [] {:condition-was false}))
+               {:initial-data "hello" :fn-to-locate-value-in-a-context false}))
+```
+
+### `flowgic/empty? flowgic/>empty?  flowgic/>not-empty? `
+the same as `flowgic/true? flowgic/>true?  flowgic/>false? ` but matching nil instead of true/false
+
+```clojure
+(= [:continue {:initial-data "hello", :fn-to-locate-value-in-a-context nil, :condition-was true}]
+   (f/evaluate (f/empty? :fn-to-locate-value-in-a-context
+                       (f/continue (defnk on-true-fn [:as map]) []{:condition-was true})
+                       (f/continue (defnk on-false-fn [:as map]) []{:condition-was false})
+                       )
+               {:initial-data "hello" :fn-to-locate-value-in-a-context nil}))
+               
+(= [:continue {:initial-data "hello", :fn-to-locate-value-in-a-context nil, :condition-was true}]
+   (f/evaluate (f/>empty? :fn-to-locate-value-in-a-context
+                       (f/continue (defnk on-true-fn [:as map]) []{:condition-was true}))
+               {:initial-data "hello" :fn-to-locate-value-in-a-context nil}))
+               
+(= [:continue {:initial-data "hello", :fn-to-locate-value-in-a-context 1, :condition-was false}]
+   (f/evaluate (f/>not-empty? :fn-to-locate-value-in-a-context
+                       (f/continue (defnk on-false-fn [:as map]) []{:condition-was false}))
+               {:initial-data "hello" :fn-to-locate-value-in-a-context 1}))                              
+                              
+```
+
+
 
 ##TODO
 explain following types (flowgit/Evaluation impls)
-
-* core/Rule
- * flowgic/true?
- * flowgic/>true?
- * flowgic/>false?
- * flowgic/emtpy?
- * flowgic/>emtpy?
- * flowgic/>not-emtpy?
 
 more   
    
 * core/Merge => flowgic/merge
 * core/APIFn => flowgic/api
 
-and more
 
 * flowgic/just
 
