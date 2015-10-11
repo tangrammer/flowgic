@@ -6,6 +6,11 @@
 (defprotocol Meta
   (meta-name [_]))
 
+(defrecord Vertice [n]
+  Meta
+  (meta-name [this]
+    (name n)))
+
 
 (defmethod clojure.core/print-method Continuation
   [this ^java.io.Writer writer]

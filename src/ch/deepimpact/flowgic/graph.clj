@@ -4,12 +4,17 @@
             [ch.deepimpact.flowgic.core :as c*]
             [rhizome.viz :as viz])
 
-  (:import [ch.deepimpact.flowgic.core Merge Continuation Return Rule]))
+  (:import [ch.deepimpact.flowgic.core Merge Continuation Return Rule]
+           [ch.deepimpact.flowgic.meta Vertice]))
 
 ;; this ns should live in another lib
+(defprotocol Graph
+  (relations [_ result b n])
+  (color [_])
+  )
 
-(def END :END)
-(def START :START)
+(def END (Vertice. :START))
+(def START (Vertice. :END))
 ;; this fn should be moved to protocol and lets polymorphism do the rest
 (defn add* [c k v]
   (if (and (not= clojure.lang.PersistentVector (type  k)) (not= clojure.lang.PersistentVector (type  v)))
@@ -33,10 +38,7 @@
         (if f "false" "true")
         "else"))))
 
-(defprotocol Graph
-  (relations [_ result b n])
-  (color [_])
-  )
+
 
 (extend-protocol Graph
   clojure.lang.PersistentVector
@@ -64,7 +66,7 @@
                    (reduce (fn [c [_ v] ]
                              (add* c this v)
                              ) result (:possibilities this))
-                   (add* result this (with-meta n {:rule-val (else-option (:possibilities this))})))
+                   (add* result this  (with-meta n {:rule-val (else-option (:possibilities this))}) ))
                  (add* b this)
                  )
             (:possibilities this)))
@@ -92,13 +94,19 @@
   clojure.lang.Keyword
   (color [_]
     "black")
+  Vertice
+  (relations [this result b n]
+    nil)
+  (color [_]
+    "black")
+
   )
 
 
 
 (defn view [logic-container proyection]
   (let [g (relations logic-container {START #{} END #{}} START END)]
-    (viz/view-graph (keys g) g
+   (viz/view-graph (keys g) g
                     :vertical? (= proyection :vertical)
                     :options { :resolution 72 :bgcolor "#C6CFD532"}
                     :node->descriptor (fn [n*] (let [n (m/meta-name n*)]
@@ -114,7 +122,7 @@
                                                               "Continuation" "#F8ECE0"
                                                               "none"
                                                               )
-                                                 :shape (if (or (= n (name END)) (= n (name START))) "none"
+                                                 :shape (if (or (= n*  END) (= n*  START)) "none"
                                                             (if (= "Rule" (.getSimpleName(type n*)))
                                                               "diamond"
                                                               (if (= "Return" (.getSimpleName(type n* )))
