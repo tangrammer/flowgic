@@ -7,24 +7,6 @@
 (defn evaluate [this context]
   (core/evaluate this context))
 
-;; this is an API logic, it helps on api fn definition
-(defn controller [api-key steps context-fn]
-  (Controller. steps context-fn api-key))
-
-;; if you need to use an existent logic steps ....
-;; given a sequence of steps, replace :just for :continue
-;; and merge context in the result
-(defn merge
-  ([steps]
-   (merge steps [] {}))
-  ([steps result-keys]
-   (merge steps result-keys {}))
-  ([steps result-keys flags]
-   (let [last-step (peek steps)
-         r-k (into (:result-keys last-step) result-keys)
-         r-f  (clojure.core/merge (:flags last-step) flags)
-         last-step-mod (assoc last-step :result-keys r-k :flags r-f)]
-     (Merge. (-> steps pop (conj last-step-mod)) r-k r-f))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,3 +76,38 @@
   [location-value-fn  false-fn]
   (Rule. :>not-empty? location-value-fn nil?
          {false (with-meta false-fn {:rule-val false})}))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; COMPOSITION ;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; if you need to use an existent logic steps ....
+;; given a sequence of steps, replace :just for :continue
+;; and merge context in the result
+(defn merge
+  ([steps]
+   (merge steps [] {}))
+  ([steps result-keys]
+   (merge steps result-keys {}))
+  ([steps result-keys flags]
+   (let [last-step (peek steps)
+         r-k (into (:result-keys last-step) result-keys)
+         r-f  (clojure.core/merge (:flags last-step) flags)
+         last-step-mod (assoc last-step :result-keys r-k :flags r-f)]
+     (Merge. (-> steps pop (conj last-step-mod)) r-k r-f))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; CONTROLLER ;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; this is an API logic, it helps on api fn definition
+(defn controller [api-key steps context-fn]
+  (Controller. steps context-fn api-key))
