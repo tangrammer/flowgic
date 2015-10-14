@@ -38,8 +38,6 @@
         (if f "false" "true")
         "else"))))
 
-
-
 (extend-protocol Graph
   clojure.lang.PersistentVector
   (relations [rules result b n]
@@ -101,8 +99,6 @@
     "black")
 
   )
-
-
 
 (defn view [logic-container proyection]
   (let [g (relations logic-container {START #{} END #{}} START END)]

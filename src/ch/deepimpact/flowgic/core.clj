@@ -6,20 +6,20 @@
 
 (extend-protocol Evaluation
   clojure.lang.PersistentVector
-  (evaluate [rules flow-context]
+  (evaluate [rules context]
     (let [rules (flatten rules)]
-        (loop [a (first rules) n* (next rules) c flow-context]
+        (loop [a (first rules) n* (next rules) c context]
           (let [[kcontinue res] (evaluate a c)]
             (if (and n* (= :continue kcontinue))
               (recur (first n*) (next n*) res)
               [kcontinue res]))))))
 
-(defrecord APIFn [steps flow-context-fn api-key]
+(defrecord APIFn [steps context-fn api-key]
   Evaluation
-  (evaluate [this initial-data]
-    (let [initial-data (clojure.core/merge initial-data {:error-key api-key})
-          context (clojure.core/merge (flow-context-fn initial-data) initial-data)]
-      (last (evaluate steps context)))))
+  (evaluate [this context]
+    (let [initial-data (clojure.core/merge context {:error-key api-key})
+          augmented-context (clojure.core/merge (context-fn context) initial-data)]
+      (last (evaluate steps augmented-context)))))
 
 (defrecord Merge [steps result-keys flags]
   Evaluation
@@ -43,7 +43,6 @@
   (evaluate [this context]
     [:exit (action-fn context)]))
 
-
 (defrecord Rule [type location-value-fn evaluation-fn possibilities]
   Evaluation
   (evaluate [this context]
@@ -54,7 +53,4 @@
           (if ((complement nil?) action-fn)
             (evaluate action-fn context)
             [:continue context]))
-        [:continue context])))
-
-
-  )
+        [:continue context]))))

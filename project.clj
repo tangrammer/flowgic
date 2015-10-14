@@ -7,6 +7,5 @@
                  [prismatic/schema "0.4.3"]
                  [prismatic/plumbing "0.4.4"]
                  [rhizome "0.2.5"]]
-
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.11"]]
                    :source-paths ["dev"]}})

@@ -65,24 +65,32 @@
 
 (defn true?
   ([location-value-fn  true-fn false-fn]
-   (Rule. :true? location-value-fn identity {true (with-meta true-fn {:rule-val true}) false (with-meta false-fn {:rule-val false})})))
+   (Rule. :true? location-value-fn identity
+          {true (with-meta true-fn {:rule-val true})
+           false (with-meta false-fn {:rule-val false})})))
 
 (defn >true?
   [location-value-fn true-fn]
-  (Rule. :>true? location-value-fn identity {true (with-meta true-fn {:rule-val true})}))
+  (Rule. :>true? location-value-fn identity
+         {true (with-meta true-fn {:rule-val true})}))
 
 (defn >false?
   [location-value-fn false-fn]
-  (Rule. :>false? location-value-fn identity {false (with-meta false-fn {:rule-val false})}))
+  (Rule. :>false? location-value-fn identity
+         {false (with-meta false-fn {:rule-val false})}))
 
 (defn empty?
   ([location-value-fn  true-fn false-fn]
-   (Rule. :empty? location-value-fn nil? {true (with-meta true-fn {:rule-val true}) false (with-meta false-fn {:rule-val false})})))
+   (Rule. :empty? location-value-fn nil?
+          {true (with-meta true-fn {:rule-val true})
+           false (with-meta false-fn {:rule-val false})})))
 
 (defn >empty?
   [location-value-fn  true-fn]
-  (Rule. :>empty? location-value-fn nil? {true (with-meta true-fn {:rule-val true})}))
+  (Rule. :>empty? location-value-fn nil?
+         {true (with-meta true-fn {:rule-val true})}))
 
 (defn >not-empty?
-  [ location-value-fn  false-fn]
-  (Rule. :>not-empty? location-value-fn nil? {false (with-meta false-fn {:rule-val false})}))
+  [location-value-fn  false-fn]
+  (Rule. :>not-empty? location-value-fn nil?
+         {false (with-meta false-fn {:rule-val false})}))

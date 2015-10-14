@@ -11,21 +11,17 @@
   (meta-name [this]
     (name n)))
 
-
 (defmethod clojure.core/print-method Continuation
   [this ^java.io.Writer writer]
   (.write writer (str  (meta-name this))))
 
 (defmethod clojure.core/print-method Return
   [this ^java.io.Writer writer]
-  (.write writer (str  (meta-name this)))
-  )
-
+  (.write writer (str  (meta-name this))))
 
 (defmethod clojure.core/print-method Rule
   [this ^java.io.Writer writer]
-  (.write writer (str  (meta-name this)))
-  )
+  (.write writer (str  (meta-name this))))
 
 (extend-protocol Meta
   Merge
