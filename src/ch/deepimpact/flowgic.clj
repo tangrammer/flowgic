@@ -1,6 +1,6 @@
 (ns ch.deepimpact.flowgic
   (:require [ch.deepimpact.flowgic.core :as core])
-  (:import [ch.deepimpact.flowgic.core Continuation Return Merge APIFn Rule])
+  (:import [ch.deepimpact.flowgic.core Continuation Return Merge Controller Rule])
   (:refer-clojure :exclude [true? empty? merge]))
 
 ;; main protocol fn
@@ -8,8 +8,8 @@
   (core/evaluate this context))
 
 ;; this is an API logic, it helps on api fn definition
-(defn api [api-key steps flow-context-fn]
-  (APIFn. steps flow-context-fn api-key))
+(defn controller [api-key steps context-fn]
+  (Controller. steps context-fn api-key))
 
 ;; if you need to use an existent logic steps ....
 ;; given a sequence of steps, replace :just for :continue
