@@ -13,8 +13,8 @@
   (color [_])
   )
 
-(def END (Vertice. :START))
-(def START (Vertice. :END))
+(def END (Vertice. :END))
+(def START (Vertice. :START))
 ;; this fn should be moved to protocol and lets polymorphism do the rest
 (defn add* [c k v]
   (if (and (not= clojure.lang.PersistentVector (type  k)) (not= clojure.lang.PersistentVector (type  v)))
