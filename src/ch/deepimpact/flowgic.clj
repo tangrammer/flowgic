@@ -67,6 +67,12 @@
           {true (with-meta true-fn {:rule-val true})
            false (with-meta false-fn {:rule-val false})})))
 
+(defn not-empty?
+  ([location-value-fn  true-fn false-fn]
+   (Rule. :empty? location-value-fn nil?
+          {false (with-meta true-fn {:rule-val true})
+           true (with-meta false-fn {:rule-val false})})))
+
 (defn >empty?
   [location-value-fn  true-fn]
   (Rule. :>empty? location-value-fn nil?
