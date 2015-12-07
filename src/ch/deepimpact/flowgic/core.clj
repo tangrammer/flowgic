@@ -10,8 +10,11 @@
     (let [res (action-fn context)
           e (if add-context?
               (clojure.core/merge context (select-keys res result-keys) flags)
-              (clojure.core/merge res flags))]
+              (if (empty? flags)
+                res
+                (clojure.core/merge res flags)))]
       [:continue e])))
+
 
 (defrecord Return [action-fn]
   Evaluation
