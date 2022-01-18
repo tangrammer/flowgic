@@ -9,7 +9,7 @@ In this complected scenario, our understanding decreases exponentially. `flowgic
     [ch.deepimpact/flowgic "0.1.0"]
 
 
-###Goals
+### Goals
 
 * the code becomes clearer :)
 * the code is so clear that task's communication between devs and clients or project managers is improved :)
@@ -24,7 +24,7 @@ In this complected scenario, our understanding decreases exponentially. `flowgic
 * your fns must receive a map and return a map (yep! like a ring handler). Of course you could always adapt your *controller-fns* to this great pattern => [Prismatic/Graph](https://github.com/Prismatic/plumbing#graph-the-functional-swiss-army-knife) , [Prismatic/fnk](https://github.com/Prismatic/plumbing#fnk) 
 
 
-###`prismatic/defnk` and `prismatic/fnk`
+### `prismatic/defnk` and `prismatic/fnk`
 Starting here the example code will use `prismatic/defnk` and `prismatic/fnk` to simplify working with fns that receive a map of keys/values. it's not required to use these macros but we think they are great syntatic sugar focused in clarify too.
 
 
@@ -46,8 +46,8 @@ Starting here the example code will use `prismatic/defnk` and `prismatic/fnk` to
 (example-fnk {:a 1 :b 2 :c 3})
 ```
 
-#Concepts
-###`flowgic.core/Logic` Protocol
+# Concepts
+### `flowgic.core/Logic` Protocol
 Agreeing that a `controller-fn` is a **sequence of logics to be evaluated** having a context, we can derive following `Logic` protocol
 
 ```clojure
@@ -270,7 +270,7 @@ the same as `flowgic/true? flowgic/>true?  flowgic/>false? ` but matching nil in
 
 
 
-##TODO
+## TODO
 explain following types (flowgit/Evaluation impls)
 
 more   
@@ -282,13 +282,13 @@ more
 * f/just
 
 
-##More things interesting
+## More things interesting
 
 
-###fn & DI
+### fn & DI
 `flowgic` is really very influenced by [Prismatic/graph](link) and its Dependency Injection at the *function&args* level
 
-###pipeline programming
+### pipeline programming
 yep, `flowgic` remains a bit similar to [pipeline programming](https://en.wikipedia.org/wiki/Pipeline_(software)) 
 
 ### similar to ring protocol, 
